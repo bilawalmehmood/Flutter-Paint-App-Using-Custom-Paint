@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_painting_app/models/drwing_area_model.dart';
 import 'package:flutter_painting_app/screens/home/components/custom_gradient.dart';
 import 'package:flutter_painting_app/screens/home/components/my_custom_painter.dart';
 import 'package:flutter_painting_app/screens/home/controller/home_controller.dart';
@@ -12,7 +13,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Offset?> points = [];
+  late final HomeController controller = Get.put(HomeController());
+  List<DrwingAreaModel?> points = [];
   @override
   Widget build(BuildContext context) {
     Get.put(HomeController());
@@ -41,12 +43,26 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: GestureDetector(
                       onPanDown: (details) {
                         setState(() {
-                          points.add(details.localPosition);
+                          points.add(DrwingAreaModel(
+                            point: details.localPosition,
+                            areaPaint: Paint()
+                              ..color = controller.selectedColor.value
+                              ..strokeCap = StrokeCap.round
+                              ..strokeWidth = controller.strokWidth.value
+                              ..isAntiAlias = true,
+                          ));
                         });
                       },
                       onPanUpdate: (details) {
                         setState(() {
-                          points.add(details.localPosition);
+                          points.add(DrwingAreaModel(
+                            point: details.localPosition,
+                            areaPaint: Paint()
+                              ..color = controller.selectedColor.value
+                              ..strokeCap = StrokeCap.round
+                              ..strokeWidth = controller.strokWidth.value
+                              ..isAntiAlias = true,
+                          ));
                         });
                       },
                       onPanEnd: (details) {
@@ -57,7 +73,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: CustomPaint(
-                          painter: MyCustomPainter(points: points),
+                          painter: MyCustomPainter(
+                            points: points,
+                            selctedColor: controller.selectedColor.value,
+                            strokeWidth: controller.strokWidth.value,
+                          ),
                         ),
                       ),
                     ),
@@ -65,17 +85,41 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 15),
                   Container(
                     width: Get.width * .8,
+                    height: Get.height * .07,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
                       children: [
+                        Obx(
+                          () => IconButton(
+                            onPressed: () => controller.setColor(context),
+                            icon: const Icon(
+                              Icons.color_lens,
+                            ),
+                            color: controller.selectedColor.value,
+                          ),
+                        ),
+                        Obx(
+                          () => Expanded(
+                            child: Slider(
+                              min: 1.0,
+                              max: 7.0,
+                              value: controller.strokWidth.value,
+                              activeColor: controller.selectedColor.value,
+                              onChanged: (value) {
+                                controller.strokWidth(value);
+                              },
+                            ),
+                          ),
+                        ),
                         IconButton(
-                            onPressed: () {},
-                            icon: const Icon(Icons.color_lens)),
-                        IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              setState(() {
+                                points.clear();
+                              });
+                            },
                             icon: const Icon(Icons.layers_clear))
                       ],
                     ),

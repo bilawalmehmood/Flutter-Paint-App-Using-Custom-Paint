@@ -1,12 +1,19 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_painting_app/models/drwing_area_model.dart';
 import 'package:get/get.dart';
 
 class MyCustomPainter extends CustomPainter {
-  List<Offset?> points = [];
+  List<DrwingAreaModel?> points = [];
+  Color selctedColor;
+  double strokeWidth;
 
-  MyCustomPainter({required this.points});
+  MyCustomPainter({
+    required this.points,
+    required this.selctedColor,
+    required this.strokeWidth,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -15,17 +22,13 @@ class MyCustomPainter extends CustomPainter {
     Rect rect = Rect.fromLTWH(0, 0, Get.width * .8, Get.height * .8);
     canvas.drawRect(rect, backgroungColor);
 
-    Paint paint = Paint();
-    paint.color = Colors.black;
-    paint.strokeWidth = 3.0;
-    paint.isAntiAlias = true;
-    paint.strokeCap = StrokeCap.round;
-
     for (int i = 0; i < points.length; i++) {
       if (points[i] != null && points[i + 1] != null) {
-        canvas.drawLine(points[i]!, points[i + 1]!, paint);
+        Paint? paint = points[i]!.areaPaint;
+        canvas.drawLine(points[i]!.point!, points[i + 1]!.point!, paint!);
       } else if (points[i] != null && points[i + 1] == null) {
-        canvas.drawPoints(PointMode.points, [points[i]!], paint);
+        Paint? paint = points[i]!.areaPaint;
+        canvas.drawPoints(PointMode.points, [points[i]!.point!], paint!);
       }
     }
   }
